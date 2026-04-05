@@ -1,0 +1,1404 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-Powered Day Trading Playbook</title>
+<style>
+  :root {
+    --primary: #0f172a;
+    --primary-mid: #1e293b;
+    --primary-light: #334155;
+    --accent: #3b82f6;
+    --accent-glow: #60a5fa;
+    --accent-dark: #2563eb;
+    --green: #10b981;
+    --green-dim: #065f46;
+    --red: #ef4444;
+    --red-dim: #7f1d1d;
+    --amber: #f59e0b;
+    --amber-dim: #78350f;
+    --cyan: #06b6d4;
+    --purple: #8b5cf6;
+    --surface: #1e293b;
+    --surface-2: #273548;
+    --border: #334155;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --text-bright: #f8fafc;
+    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --mono: 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+    --radius: 10px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font);
+    background: var(--primary);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-mid) 50%, #0c1929 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 24px 18px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(59,130,246,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(59,130,246,0.15);
+    border: 1px solid rgba(59,130,246,0.3);
+    color: var(--accent-glow);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+  .header h1 {
+    font-size: clamp(22px, 4vw, 32px);
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+  .header h1 span { color: var(--accent-glow); }
+  .header p {
+    color: var(--text-dim);
+    font-size: 14px;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  /* NAV */
+  .nav-wrap {
+    background: var(--primary-mid);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 0 12px;
+  }
+  .nav {
+    display: flex;
+    overflow-x: auto;
+    gap: 2px;
+    max-width: 900px;
+    margin: 0 auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .nav::-webkit-scrollbar { display: none; }
+  .nav-btn {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-family: var(--font);
+    font-size: 12.5px;
+    font-weight: 500;
+    padding: 14px 14px;
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  .nav-btn:hover { color: var(--text); }
+  .nav-btn.active {
+    color: var(--accent-glow);
+    border-bottom-color: var(--accent);
+  }
+  .nav-btn .nav-icon { margin-right: 5px; }
+
+  /* MAIN */
+  .main {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+  }
+
+  section { display: none; animation: fadeIn 0.3s ease; }
+  section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* PHASE HEADER */
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .phase-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .phase-header h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-bright);
+  }
+  .phase-header .phase-time {
+    font-size: 13px;
+    color: var(--text-dim);
+    font-weight: 400;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: rgba(59,130,246,0.3); }
+  .card-title {
+    font-size: 15px;
+    font-weight: 650;
+    color: var(--text-bright);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .ct-icon {
+    font-size: 16px;
+  }
+
+  /* TAG */
+  .tag {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-left: auto;
+  }
+  .tag-ai { background: rgba(139,92,246,0.2); color: #a78bfa; }
+  .tag-manual { background: rgba(245,158,11,0.2); color: #fbbf24; }
+  .tag-hybrid { background: rgba(6,182,212,0.2); color: #22d3ee; }
+
+  /* STEPS */
+  .step-list { list-style: none; }
+  .step-list li {
+    position: relative;
+    padding: 8px 0 8px 28px;
+    font-size: 13.5px;
+    color: var(--text);
+    line-height: 1.55;
+  }
+  .step-list li::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 15px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .step-list li + li { border-top: 1px solid rgba(51,65,85,0.5); }
+
+  .step-list li strong { color: var(--text-bright); font-weight: 600; }
+  .step-list li code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: rgba(59,130,246,0.12);
+    color: var(--accent-glow);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  /* PROMPT BOX */
+  .prompt-box {
+    background: rgba(139,92,246,0.08);
+    border: 1px solid rgba(139,92,246,0.25);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-top: 12px;
+    position: relative;
+  }
+  .prompt-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #a78bfa;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .prompt-text {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: #c4b5fd;
+    line-height: 1.55;
+    white-space: pre-wrap;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(139,92,246,0.2);
+    border: 1px solid rgba(139,92,246,0.3);
+    color: #a78bfa;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: var(--font);
+    transition: all 0.2s;
+  }
+  .copy-btn:hover { background: rgba(139,92,246,0.35); }
+
+  /* RULE BOX */
+  .rule-box {
+    background: rgba(239,68,68,0.06);
+    border-left: 3px solid var(--red);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 16px;
+    margin-top: 12px;
+  }
+  .rule-box.green {
+    background: rgba(16,185,129,0.06);
+    border-left-color: var(--green);
+  }
+  .rule-box.amber {
+    background: rgba(245,158,11,0.06);
+    border-left-color: var(--amber);
+  }
+  .rule-box h4 {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .rule-box ul {
+    list-style: none;
+    font-size: 13px;
+  }
+  .rule-box ul li {
+    padding: 3px 0;
+    padding-left: 16px;
+    position: relative;
+  }
+  .rule-box ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--text-dim);
+  }
+
+  /* GRID */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 640px) {
+    .grid-2 { grid-template-columns: 1fr; }
+  }
+
+  /* STAT BOXES */
+  .stat-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .stat-box {
+    flex: 1;
+    min-width: 120px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+  }
+  .stat-box .stat-val {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-bright);
+  }
+  .stat-box .stat-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+
+  /* ACCORDION */
+  .accordion-item { margin-bottom: 8px; }
+  .accordion-header {
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text-bright);
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s;
+  }
+  .accordion-header:hover { border-color: rgba(59,130,246,0.3); }
+  .accordion-header.active { border-radius: 8px 8px 0 0; border-color: var(--accent); }
+  .accordion-icon { transition: transform 0.2s; font-size: 12px; }
+  .accordion-header.active .accordion-icon { transform: rotate(180deg); }
+  .accordion-content {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 16px;
+  }
+  .accordion-content.active { display: block; }
+
+  /* CHECKLIST */
+  .checklist-wrap { margin-top: 12px; }
+  .checklist-progress {
+    height: 4px;
+    background: var(--surface-2);
+    border-radius: 4px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .checklist-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--green));
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.4s ease;
+  }
+  .checklist-counter {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    text-align: right;
+  }
+  .cl-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(51,65,85,0.4);
+  }
+  .cl-item:last-child { border-bottom: none; }
+  .cl-item input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 16px;
+    height: 16px;
+    margin-top: 2px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .cl-item label {
+    font-size: 13.5px;
+    cursor: pointer;
+    line-height: 1.45;
+  }
+  .cl-item input:checked + label {
+    color: var(--text-dim);
+    text-decoration: line-through;
+  }
+
+  /* CALCULATOR */
+  .calc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 500px) { .calc-grid { grid-template-columns: 1fr; } }
+  .calc-field label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  .calc-field input, .calc-field select {
+    width: 100%;
+    background: var(--primary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    color: var(--text-bright);
+    font-family: var(--mono);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .calc-field input:focus, .calc-field select:focus {
+    border-color: var(--accent);
+  }
+  .calc-result {
+    background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(16,185,129,0.25);
+    border-radius: 8px;
+    padding: 14px;
+    margin-top: 14px;
+  }
+  .calc-result-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: 13.5px;
+  }
+  .calc-result-row .cr-label { color: var(--text-dim); }
+  .calc-result-row .cr-value { font-weight: 700; color: var(--green); font-family: var(--mono); }
+
+  /* TIMELINE */
+  .timeline { position: relative; padding-left: 24px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: var(--border);
+  }
+  .tl-item {
+    position: relative;
+    padding: 10px 0;
+  }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: 17px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--primary);
+  }
+  .tl-time {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent-glow);
+    font-family: var(--mono);
+  }
+  .tl-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-bright);
+    margin: 2px 0;
+  }
+  .tl-desc {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  /* TOOL BADGE */
+  .tool-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .tool-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background: rgba(59,130,246,0.12);
+    color: var(--accent-glow);
+    border: 1px solid rgba(59,130,246,0.2);
+  }
+  .tool-badge.tv { background: rgba(16,185,129,0.1); color: #34d399; border-color: rgba(16,185,129,0.2); }
+  .tool-badge.notion { background: rgba(245,158,11,0.1); color: #fbbf24; border-color: rgba(245,158,11,0.2); }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 20px;
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+    color: var(--text-dim);
+    font-size: 12px;
+  }
+
+  /* SECTION INTRO */
+  .section-intro {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+  .section-intro strong { color: var(--text); }
+
+  /* FLOW VISUAL */
+  .flow-strip {
+    display: flex;
+    gap: 0;
+    margin-bottom: 24px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .flow-step {
+    flex: 1;
+    padding: 12px 8px;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.2s;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+  .flow-step:last-child { border-right: none; }
+  .flow-step.current {
+    background: rgba(59,130,246,0.15);
+    color: var(--accent-glow);
+  }
+  .flow-step .fs-num {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 2px;
+  }
+
+  .note-box {
+    background: rgba(6,182,212,0.06);
+    border: 1px solid rgba(6,182,212,0.2);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-top: 12px;
+    font-size: 13px;
+    color: #67e8f9;
+  }
+  .note-box strong { color: #a5f3fc; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">Daily Playbook v2.0</div>
+  <h1>AI-Powered Day <span>Trading</span> Procedure</h1>
+  <p>A structured, phase-by-phase system integrating Claude AI, TradingView & automation into every trading decision.</p>
+</div>
+
+<div class="nav-wrap">
+  <div class="nav" id="mainNav">
+    <button class="nav-btn active" onclick="showSection('overview', this)"><span class="nav-icon">◎</span>Overview</button>
+    <button class="nav-btn" onclick="showSection('phase1', this)"><span class="nav-icon">①</span>Pre-Market</button>
+    <button class="nav-btn" onclick="showSection('phase2', this)"><span class="nav-icon">②</span>Market Open</button>
+    <button class="nav-btn" onclick="showSection('phase3', this)"><span class="nav-icon">③</span>Active Trading</button>
+    <button class="nav-btn" onclick="showSection('phase4', this)"><span class="nav-icon">④</span>Mid-Day Review</button>
+    <button class="nav-btn" onclick="showSection('phase5', this)"><span class="nav-icon">⑤</span>EOD Wrap-Up</button>
+    <button class="nav-btn" onclick="showSection('tools', this)"><span class="nav-icon">⚙</span>Tools & Sizing</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ======= OVERVIEW ======= -->
+  <section id="overview" class="active">
+    <div class="phase-header">
+      <div class="phase-icon" style="background:rgba(59,130,246,0.15); color:var(--accent-glow);">◎</div>
+      <div>
+        <h2>Daily Flow Overview</h2>
+        <div class="phase-time">Your complete AI-integrated trading day, at a glance</div>
+      </div>
+    </div>
+
+    <div class="flow-strip" id="overviewFlow">
+      <div class="flow-step current" onclick="showSection('phase1',document.querySelectorAll('.nav-btn')[1])">
+        <span class="fs-num">①</span>Pre-Market
+      </div>
+      <div class="flow-step" onclick="showSection('phase2',document.querySelectorAll('.nav-btn')[2])">
+        <span class="fs-num">②</span>Market Open
+      </div>
+      <div class="flow-step" onclick="showSection('phase3',document.querySelectorAll('.nav-btn')[3])">
+        <span class="fs-num">③</span>Active Trading
+      </div>
+      <div class="flow-step" onclick="showSection('phase4',document.querySelectorAll('.nav-btn')[4])">
+        <span class="fs-num">④</span>Mid-Day
+      </div>
+      <div class="flow-step" onclick="showSection('phase5',document.querySelectorAll('.nav-btn')[5])">
+        <span class="fs-num">⑤</span>EOD Wrap
+      </div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-val" style="color:var(--accent-glow)">5</div>
+        <div class="stat-label">Phases</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" style="color:var(--purple)">12+</div>
+        <div class="stat-label">AI Prompts</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" style="color:var(--green)">3</div>
+        <div class="stat-label">Core Tools</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" style="color:var(--amber)">~6h</div>
+        <div class="stat-label">Active Window</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">🧠</span> The AI Collaboration Philosophy</div>
+      <ul class="step-list">
+        <li><strong>AI is your analyst, not your decision-maker.</strong> Claude scans, filters, and structures information — you pull the trigger based on your edge and rules.</li>
+        <li><strong>Prompt → Process → Validate → Act.</strong> Every AI output gets cross-checked against your charting and system rules before becoming a trade.</li>
+        <li><strong>Systematic journaling with AI closes the loop.</strong> Post-session reviews with Claude identify pattern drift, emotional leaks, and edge degradation over time.</li>
+        <li><strong>Keep the human in the loop for execution.</strong> AI handles the data-heavy pre-work and post-work. You handle real-time tape reading and order placement.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">🔧</span> Core Tool Stack</div>
+      <div class="grid-2">
+        <div>
+          <ul class="step-list">
+            <li><strong>Claude AI</strong> — News scanning, sentiment analysis, trade review, journaling, rules checking</li>
+            <li><strong>TradingView</strong> — Charts, Pine Script indicators, screener, alerts</li>
+          </ul>
+        </div>
+        <div>
+          <ul class="step-list">
+            <li><strong>Notion / Sheets</strong> — Trade log, watchlist tracker, daily scorecard</li>
+            <li><strong>Broker Terminal</strong> — Kite / any broker for execution and real-time data</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">⏰</span> Recommended Daily Timeline (IST for NSE)</div>
+      <div class="timeline">
+        <div class="tl-item"><span class="tl-time">08:00 – 09:00</span><div class="tl-title">Phase 1: Pre-Market Prep</div><div class="tl-desc">AI news scan, level identification, watchlist build</div></div>
+        <div class="tl-item"><span class="tl-time">09:00 – 09:15</span><div class="tl-title">Opening Bell Observation</div><div class="tl-desc">No trades — observe opening range, gap behavior</div></div>
+        <div class="tl-item"><span class="tl-time">09:15 – 10:00</span><div class="tl-title">Phase 2: Market Open Routine</div><div class="tl-desc">AI-assisted screening, setup identification, first trades</div></div>
+        <div class="tl-item"><span class="tl-time">10:00 – 13:30</span><div class="tl-title">Phase 3: Active Trading</div><div class="tl-desc">Execute, monitor, manage positions with AI guardrails</div></div>
+        <div class="tl-item"><span class="tl-time">13:30 – 14:00</span><div class="tl-title">Phase 4: Mid-Day Review</div><div class="tl-desc">AI-assisted P&L check, bias recalibration</div></div>
+        <div class="tl-item"><span class="tl-time">15:15 – 15:45</span><div class="tl-title">Phase 5: EOD Wrap-Up</div><div class="tl-desc">AI-powered journaling, pattern review, next-day prep</div></div>
+      </div>
+      <div class="note-box"><strong>Adapt to your market:</strong> Shift times for US/EU sessions. The structure remains the same — only the clock changes.</div>
+    </div>
+  </section>
+
+  <!-- ======= PHASE 1: PRE-MARKET ======= -->
+  <section id="phase1">
+    <div class="phase-header">
+      <div class="phase-icon" style="background:rgba(59,130,246,0.15); color:var(--accent-glow);">①</div>
+      <div>
+        <h2>Pre-Market Preparation</h2>
+        <div class="phase-time">60 min before market open — Foundation for the entire day</div>
+      </div>
+    </div>
+
+    <p class="section-intro">The pre-market phase is where AI earns its keep. Instead of spending 2 hours scanning headlines and drawing levels manually, <strong>Claude compresses the information layer</strong> so you start the day with a structured, actionable brief.</p>
+
+    <!-- 1A: News & Macro Scan -->
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">📡</span> Step 1A: AI News & Macro Scan <span class="tag tag-ai">AI-Led</span></div>
+      <ul class="step-list">
+        <li><strong>Global cues check:</strong> Ask Claude to summarize overnight action — US indices close, SGX Nifty, Asia open, crude oil, DXY, US yields, any geopolitical flash points.</li>
+        <li><strong>Domestic news filter:</strong> Ask Claude to scan for market-moving domestic news — RBI policy signals, sector-specific events, earnings surprises, FII/DII flow data.</li>
+        <li><strong>Sentiment classification:</strong> Have Claude classify overall sentiment as <code>Bullish</code>, <code>Bearish</code>, or <code>Neutral</code> with a 1-line reasoning for each.</li>
+      </ul>
+      <div class="prompt-box">
+        <div class="prompt-label">🤖 Claude Prompt — Morning Brief</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+        <div class="prompt-text">You are my trading analyst. Search the web and give me a pre-market brief for NSE trading today:
+
+1. Global overnight summary: US indices (S&P, Nasdaq, Dow), SGX Nifty, crude oil, DXY, US 10Y yield, gold — each with % change and 1-line implication.
+2. Asia markets current status.
+3. Key domestic news that could move Nifty, Bank Nifty, or specific F&O stocks today.
+4. FII/DII flow data from yesterday.
+5. Overall sentiment score: Bullish / Neutral / Bearish, with 1-line reasoning.
+
+Keep it concise, actionable, and formatted as a table where possible.</div>
+      </div>
+      <div class="tool-badges">
+        <span class="tool-badge">Claude AI</span>
+        <span class="tool-badge">Web Search</span>
+      </div>
+    </div>
+
+    <!-- 1B: Key Levels -->
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">📐</span> Step 1B: Key Level Identification <span class="tag tag-hybrid">Hybrid</span></div>
+      <ul class="step-list">
+        <li><strong>Pull support/resistance from TradingView:</strong> Open your Nifty/BankNifty charts. Mark previous day high/low/close, weekly pivots, and any visible S/R zones on 75-min and daily timeframes.</li>
+        <li><strong>AI level validation:</strong> Give Claude the previous day's OHLC + current open estimate. Ask it to compute pivot points (Standard, Fibonacci, CPR) and flag confluence zones.</li>
+        <li><strong>Gap analysis:</strong> If there's a gap up/down, ask Claude to classify gap type (common, breakaway, exhaustion) based on context and prior trend.</li>
+      </ul>
+      <div class="prompt-box">
+        <div class="prompt-label">🤖 Claude Prompt — Level Computation</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+        <div class="prompt-text">Nifty 50 previous session data:
+Open: [XXXX], High: [XXXX], Low: [XXXX], Close: [XXXX]
+
+Calculate:
+1. Standard Pivot Point (PP, R1, R2, R3, S1, S2, S3)
+2. Fibonacci Pivot levels
+3. Central Pivot Range (CPR) — TC, Pivot, BC
+4. Expected opening gap based on SGX Nifty at [XXXX]
+5. Key confluence zones where multiple levels overlap
+
+Format as a clean table. Flag the 2-3 most important levels I should watch today.</div>
+      </div>
+      <div class="tool-badges">
+        <span class="tool-badge tv">TradingView</span>
+        <span class="tool-badge">Claude AI</span>
+      </div>
+    </div>
+
+    <!-- 1C: Watchlist Build -->
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">🎯</span> Step 1C: Watchlist Build <span class="tag tag-hybrid">Hybrid</span></div>
+      <ul class="step-list">
+        <li><strong>TradingView Screener:</strong> Run your saved screener filters — stocks near key EMAs (12/34 band), high relative volume, sector leaders/laggards.</li>
+        <li><strong>AI-assisted filtering:</strong> Feed the screener output to Claude with your system criteria (e.g., Wavy Tunnel alignment, MTF confluence) and ask it to rank the top 5-7 names by setup quality.</li>
+        <li><strong>Final watchlist:</strong> Narrow to <strong>max 5 stocks + index</strong>. More than that fragments your attention.</li>
+      </ul>
+      <div class="rule-box amber">
+        <h4 style="color:var(--amber);">⚡ Pre-Market Discipline Rule</h4>
+        <ul>
+          <li>Do NOT enter any trades during pre-market prep.</li>
+          <li>If you feel FOMO from gap moves, write it down and wait for your system setup.</li>
+          <li>Prep work done? Proceed to Phase 2 only after the opening bell.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 1D Checklist -->
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">✅</span> Pre-Market Checklist</div>
+      <div class="checklist-wrap" data-group="pre">
+        <div class="checklist-counter" id="pre-counter">0 / 8 complete</div>
+        <div class="checklist-progress"><div class="checklist-bar" id="pre-bar"></div></div>
+        <div class="cl-item"><input type="checkbox" id="p1" onchange="updateChecklist('pre')"><label for="p1">Global overnight summary reviewed (Claude brief)</label></div>
+        <div class="cl-item"><input type="checkbox" id="p2" onchange="updateChecklist('pre')"><label for="p2">Domestic news & events scanned</label></div>
+        <div class="cl-item"><input type="checkbox" id="p3" onchange="updateChecklist('pre')"><label for="p3">FII/DII data noted</label></div>
+        <div class="cl-item"><input type="checkbox" id="p4" onchange="updateChecklist('pre')"><label for="p4">Sentiment classified (Bull / Bear / Neutral)</label></div>
+        <div class="cl-item"><input type="checkbox" id="p5" onchange="updateChecklist('pre')"><label for="p5">Key S/R levels marked on TradingView</label></div>
+        <div class="cl-item"><input type="checkbox" id="p6" onchange="updateChecklist('pre')"><label for="p6">Pivot / CPR levels computed via Claude</label></div>
+        <div class="cl-item"><input type="checkbox" id="p7" onchange="updateChecklist('pre')"><label for="p7">Watchlist finalized (max 5 + index)</label></div>
+        <div class="cl-item"><input type="checkbox" id="p8" onchange="updateChecklist('pre')"><label for="p8">Daily bias written in one sentence</label></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======= PHASE 2: MARKET OPEN ======= -->
+  <section id="phase2">
+    <div class="phase-header">
+      <div class="phase-icon" style="background:rgba(16,185,129,0.15); color:var(--green);">②</div>
+      <div>
+        <h2>Market Open Routine</h2>
+        <div class="phase-time">First 45 minutes — Observe, screen, identify setups</div>
+      </div>
+    </div>
+
+    <p class="section-intro">The market open is <strong>information-gathering time, not trigger-pulling time.</strong> Use the first 15 minutes to observe the opening range form. Then engage AI to filter the noise and surface the best setups from your watchlist.</p>
+
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">👁️</span> Step 2A: Opening Range Observation (First 15 min) <span class="tag tag-manual">Manual</span></div>
+      <ul class="step-list">
+        <li><strong>No trades for first 15 minutes.</strong> Let the opening range (OR) form on a 5-min chart. Mark OR high and OR low on TradingView.</li>
+        <li><strong>Observe gap behavior:</strong> Is the gap filling or extending? Is initial volume strong or fading?</li>
+        <li><strong>Note sector rotation:</strong> Which sectors are leading (green) and lagging (red)? Bank Nifty vs Nifty relative strength?</li>
+        <li><strong>Check your pre-market levels:</strong> Did price open above/below your key CPR or pivot? This updates your bias.</li>
+      </ul>
+      <div class="rule-box green">
+        <h4 style="color:var(--green);">✓ Opening Range Rules</h4>
+        <ul>
+          <li>OR High/Low = your first intraday reference frame. Trade with the OR breakout direction, not against it.</li>
+          <li>If price is inside the OR after 15 min, wait for a decisive breakout before initiating.</li>
+          <li>Narrow OR (< 0.3% range on Nifty) → expect a directional move. Wide OR (> 0.7%) → range-bound risk.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">🔍</span> Step 2B: AI-Assisted Setup Identification <span class="tag tag-ai">AI-Led</span></div>
+      <ul class="step-list">
+        <li><strong>Screenshot your watchlist charts</strong> (5-min and 75-min views) and send to Claude for pattern recognition — tunnel alignment, EMA band behavior, divergence signals.</li>
+        <li><strong>Ask Claude to classify each setup</strong> as: <code>A+ (textbook)</code>, <code>B (decent, needs confirmation)</code>, or <code>Skip</code>.</li>
+        <li><strong>For top setups:</strong> Ask Claude to define the exact entry trigger, stop loss level, and first target — aligned with your system rules.</li>
+      </ul>
+      <div class="prompt-box">
+        <div class="prompt-label">🤖 Claude Prompt — Setup Scanner</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+        <div class="prompt-text">Here are my watchlist charts after the first 15 minutes of market open. [Attach screenshots]
+
+For each stock, evaluate:
+1. Is the 12/34 EMA band bullish, bearish, or neutral on the 5-min and 75-min?
+2. Is there a valid entry setup forming? (Breakout, pullback to EMA, pattern completion)
+3. Where is the logical stop loss (below recent swing low or EMA band)?
+4. What's the first target (next resistance / 1:2 RR)?
+
+Rate each as A+ (take immediately), B (wait for confirmation), or Skip.
+Only show me the A+ and B setups.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">📋</span> Step 2C: Trade Plan Lock-In <span class="tag tag-manual">Manual</span></div>
+      <ul class="step-list">
+        <li><strong>From the A+ setups:</strong> Write your trade plan for each — ticker, direction, entry, SL, T1, T2, position size (use the calculator in the Tools tab).</li>
+        <li><strong>Set TradingView alerts</strong> at your entry trigger levels so you don't have to stare at charts.</li>
+        <li><strong>Pre-define your max risk budget:</strong> Total capital at risk across all open positions should not exceed 2% of your trading capital.</li>
+      </ul>
+      <div class="note-box"><strong>Key principle:</strong> If you don't have a written plan before entering, you don't have an edge — you have a gamble. Write it down or type it to Claude. Verbalizing forces clarity.</div>
+    </div>
+  </section>
+
+  <!-- ======= PHASE 3: ACTIVE TRADING ======= -->
+  <section id="phase3">
+    <div class="phase-header">
+      <div class="phase-icon" style="background:rgba(245,158,11,0.15); color:var(--amber);">③</div>
+      <div>
+        <h2>Active Trading Phase</h2>
+        <div class="phase-time">Core session — Execute, monitor, manage with AI guardrails</div>
+      </div>
+    </div>
+
+    <p class="section-intro">This is where you execute planned trades and manage live positions. AI's role shifts to <strong>monitoring, rule-checking, and preventing emotional drift.</strong> You drive; AI is your co-pilot.</p>
+
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">⚡</span> Step 3A: Trade Execution Protocol <span class="tag tag-manual">Manual</span></div>
+      <ul class="step-list">
+        <li><strong>Entry confirmation:</strong> Only enter when your pre-defined trigger fires AND you can articulate why in one sentence. "It broke above OR high with volume on a bullish EMA stack" — that's a valid reason.</li>
+        <li><strong>Immediate SL placement:</strong> Stop loss goes in the system the moment you enter. Not mental — actual bracket/SL-M order.</li>
+        <li><strong>Position sizing:</strong> Use the calculator (Tools tab) — never size by gut feeling.</li>
+        <li><strong>Log the trade instantly:</strong> Ticker, time, direction, entry, SL, target, lot size, rationale — in your trade log (Notion/Sheets).</li>
+      </ul>
+      <div class="rule-box">
+        <h4 style="color:var(--red);">🚨 Hard Rules — Non-Negotiable</h4>
+        <ul>
+          <li>Max 1% risk per trade (2% absolute maximum for A+ setups only)</li>
+          <li>Max 3 simultaneous open positions</li>
+          <li>Max daily loss = 3% of capital → <strong>STOP trading for the day</strong></li>
+          <li>No revenge trades — if you hit 2 consecutive losses, take a 30-min break</li>
+          <li>No averaging down on losing positions — ever</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">🤖</span> Step 3B: AI Monitoring & Rule Checks <span class="tag tag-ai">AI-Led</span></div>
+      <ul class="step-list">
+        <li><strong>Mid-trade validation:</strong> If you're tempted to move your stop, widen your position, or take a trade not on your plan — <strong>ask Claude first.</strong></li>
+        <li><strong>Sentiment shift detection:</strong> Every 60-90 minutes, ask Claude to check if any breaking news or macro shift has changed the market context from your pre-market thesis.</li>
+        <li><strong>Pattern exit signals:</strong> If your system generates potential exit signals (divergence, trend exhaustion), screenshot the chart and ask Claude to validate.</li>
+      </ul>
+      <div class="prompt-box">
+        <div class="prompt-label">🤖 Claude Prompt — Emotional Check / Rule Guard</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+        <div class="prompt-text">I'm in a trade and feeling the urge to [move my stop / add to my position / take an unplanned trade]. Here's the situation:
+
+Stock: [Ticker], Direction: [Long/Short]
+Entry: [price], Current SL: [price], Current price: [price]
+Original plan: [1-line summary]
+What I want to do now: [describe the urge]
+
+Based on sound risk management principles, should I follow through or stick to my original plan? Be brutally honest.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">🎚️</span> Step 3C: Position Management Framework <span class="tag tag-hybrid">Hybrid</span></div>
+      <div class="grid-2">
+        <div class="rule-box green" style="margin-top:0;">
+          <h4 style="color:var(--green);">✅ Winners — Trail & Protect</h4>
+          <ul>
+            <li>At 1R profit → move SL to breakeven</li>
+            <li>At 1.5R → trail SL to lock in 0.5R</li>
+            <li>At 2R → book 50% position, trail rest</li>
+            <li>At 3R → book another 25%, trail rest with EMA</li>
+          </ul>
+        </div>
+        <div class="rule-box" style="margin-top:0;">
+          <h4 style="color:var(--red);">❌ Losers — Cut & Move On</h4>
+          <ul>
+            <li>SL hit → exit immediately, no hoping</li>
+            <li>Time stop: if no movement in 30 min → reassess</li>
+            <li>If thesis invalidated → exit even before SL</li>
+            <li>Never widen the SL after entry — never</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">📊</span> Step 3D: Real-Time AI Signals Layer <span class="tag tag-ai">AI-Led</span></div>
+      <ul class="step-list">
+        <li><strong>TradingView alerts as triggers:</strong> Set Pine Script alerts for your system signals (EMA crossovers, RSI divergence, volume spikes). When they fire, validate with Claude before acting.</li>
+        <li><strong>Sector rotation monitoring:</strong> Ask Claude every 90 minutes to check which sectors are gaining/losing relative strength. Rotate your attention accordingly.</li>
+        <li><strong>Volatility regime check:</strong> If India VIX spikes > 5% intraday, ask Claude to assess whether this changes your position sizing or strategy.</li>
+      </ul>
+      <div class="prompt-box">
+        <div class="prompt-label">🤖 Claude Prompt — Signal Validation</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+        <div class="prompt-text">My TradingView alert fired for [TICKER] on [timeframe]. Signal: [describe — e.g., "bullish EMA crossover on 5-min with RSI above 60"].
+
+Here's the chart screenshot. [Attach]
+
+Validate this signal:
+1. Does it align with the higher timeframe trend (75-min)?
+2. Is there confirmation from volume?
+3. Any divergence or exhaustion signals that contradict?
+4. Suggested entry, SL, and target if valid.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======= PHASE 4: MID-DAY REVIEW ======= -->
+  <section id="phase4">
+    <div class="phase-header">
+      <div class="phase-icon" style="background:rgba(6,182,212,0.15); color:var(--cyan);">④</div>
+      <div>
+        <h2>Mid-Day Review</h2>
+        <div class="phase-time">~30 min — Recalibrate bias and assess performance</div>
+      </div>
+    </div>
+
+    <p class="section-intro">The mid-day review is your <strong>circuit breaker</strong>. Markets shift, emotions accumulate, and your morning thesis may no longer hold. This phase uses AI to force an objective recalibration before the afternoon session.</p>
+
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">📊</span> Step 4A: P&L Snapshot <span class="tag tag-manual">Manual</span></div>
+      <ul class="step-list">
+        <li><strong>Tally your P&L so far.</strong> Realized and unrealized. How does it compare to your daily target and max loss limit?</li>
+        <li><strong>Count your trades.</strong> How many taken vs planned? Any unplanned trades? Were those winners or losers?</li>
+        <li><strong>Emotional check-in:</strong> On a scale of 1-5, how disciplined have you been? Any revenge trades, FOMO entries, or premature exits?</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">🔄</span> Step 4B: AI Bias Recalibration <span class="tag tag-ai">AI-Led</span></div>
+      <ul class="step-list">
+        <li><strong>Market structure update:</strong> Ask Claude to assess if the morning trend is intact or if the market character has changed (trending → ranging, or vice versa).</li>
+        <li><strong>News update:</strong> Any mid-day developments that shift the thesis? Central bank statements, geopolitical events, large block deals?</li>
+        <li><strong>Afternoon game plan:</strong> Based on updated context, should you be aggressive, defensive, or flat?</li>
+      </ul>
+      <div class="prompt-box">
+        <div class="prompt-label">🤖 Claude Prompt — Mid-Day Recalibration</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+        <div class="prompt-text">Mid-day review for my trading session:
+
+Morning bias was: [Bullish/Bearish/Neutral]
+Trades taken: [X], Winners: [X], Losers: [X]
+Current P&L: [₹XXXX]
+Emotional state: [Focused / Frustrated / Overconfident / Neutral]
+
+Current Nifty: [XXXX], BankNifty: [XXXX]
+Any notable mid-day developments? [Check web]
+
+Based on this, advise:
+1. Is my morning bias still valid or should I flip/go neutral?
+2. Should I continue trading aggressively or scale down?
+3. Any new setups forming for the afternoon session?
+4. If I'm near my daily loss limit, tell me to stop — don't sugarcoat it.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">⚖️</span> Step 4C: Decision Matrix <span class="tag tag-manual">Manual</span></div>
+      <div class="grid-2">
+        <div class="rule-box green" style="margin-top:0;">
+          <h4 style="color:var(--green);">🟢 Continue Trading If:</h4>
+          <ul>
+            <li>P&L is positive or within normal drawdown</li>
+            <li>Emotional state is calm and focused</li>
+            <li>Market structure supports further trades</li>
+            <li>You have remaining A/B setups on your list</li>
+          </ul>
+        </div>
+        <div class="rule-box" style="margin-top:0;">
+          <h4 style="color:var(--red);">🔴 STOP Trading If:</h4>
+          <ul>
+            <li>Hit daily loss limit (3% of capital)</li>
+            <li>3+ consecutive losing trades</li>
+            <li>Feeling frustrated, angry, or revenge-driven</li>
+            <li>Market is choppy with no clear direction</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======= PHASE 5: EOD WRAP-UP ======= -->
+  <section id="phase5">
+    <div class="phase-header">
+      <div class="phase-icon" style="background:rgba(139,92,246,0.15); color:var(--purple);">⑤</div>
+      <div>
+        <h2>End-of-Day Wrap-Up</h2>
+        <div class="phase-time">Post-close — AI-powered journaling & continuous improvement</div>
+      </div>
+    </div>
+
+    <p class="section-intro">This is the <strong>highest-ROI phase</strong> most traders skip. AI-powered journaling transforms raw trade data into patterns, lessons, and actionable improvements. Done consistently, this compounds your edge over weeks and months.</p>
+
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">📝</span> Step 5A: Trade Log Completion <span class="tag tag-manual">Manual</span></div>
+      <ul class="step-list">
+        <li><strong>Complete every field</strong> in your trade log: entry/exit time, entry/exit price, SL, target, position size, P&L (₹ and R-multiple), setup grade (A/B/C).</li>
+        <li><strong>Add screenshots</strong> of entry and exit charts for each trade. These are gold for future review.</li>
+        <li><strong>Tag each trade:</strong> <code>System</code> (followed rules), <code>Impulse</code> (deviated from plan), <code>Missed</code> (valid setup you didn't take).</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">🤖</span> Step 5B: AI-Powered Trade Review <span class="tag tag-ai">AI-Led</span></div>
+      <ul class="step-list">
+        <li><strong>Feed your trade log to Claude</strong> and ask for a structured analysis. The AI can spot patterns you're blind to — recurring mistakes, time-of-day biases, setup-type performance differences.</li>
+        <li><strong>Ask Claude to grade your discipline</strong> on a 1-10 scale based on your rule adherence today.</li>
+        <li><strong>Request a "one thing to fix tomorrow"</strong> — a single, specific improvement point for the next session.</li>
+      </ul>
+      <div class="prompt-box">
+        <div class="prompt-label">🤖 Claude Prompt — EOD Journal Analysis</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+        <div class="prompt-text">Here's my complete trade log for today: [paste or attach]
+
+Analyze my session:
+1. Win rate, average R per trade, total R earned/lost
+2. Best trade: what made it work?
+3. Worst trade: what went wrong? Was it a system trade or impulse?
+4. Pattern observations: any recurring mistakes or strengths?
+5. Time analysis: which time window were my best/worst trades?
+6. Discipline score (1-10): did I follow my rules?
+7. One specific thing to improve tomorrow.
+
+Be honest and constructive. Don't just tell me what I want to hear.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">📈</span> Step 5C: Weekly Pattern Mining (Every Friday) <span class="tag tag-ai">AI-Led</span></div>
+      <ul class="step-list">
+        <li><strong>End of each week:</strong> Send Claude the full week's trade log and ask for a deeper statistical analysis — equity curve shape, setup performance breakdown, emotional pattern detection.</li>
+        <li><strong>Compare against previous weeks:</strong> Is your edge improving, degrading, or flat? Is there a specific setup type you should trade more/less?</li>
+        <li><strong>System refinement suggestions:</strong> Ask Claude if any rule modifications or new filters would have improved your results this week.</li>
+      </ul>
+      <div class="prompt-box">
+        <div class="prompt-label">🤖 Claude Prompt — Weekly Review</div>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+        <div class="prompt-text">Here are my daily trade logs for this week (Mon-Fri): [paste all]
+
+Generate a weekly trading report:
+1. Overall stats: total trades, win rate, avg winner vs avg loser, expectancy (avg R), max drawdown
+2. Best day and worst day — what was different?
+3. Setup performance breakdown: which setup types are profitable and which are bleeding?
+4. Emotional/discipline trend across the week
+5. Time-of-day analysis: when am I sharpest?
+6. Compared to last week [paste last week's summary if available], am I improving?
+7. Top 3 actionable changes for next week, ranked by impact.
+
+Format as a structured report with clear sections.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">🔄</span> Step 5D: Next-Day Prep Seed <span class="tag tag-hybrid">Hybrid</span></div>
+      <ul class="step-list">
+        <li><strong>Overnight holds:</strong> If carrying any positional trades, note the plan for tomorrow — trail levels, exit triggers, or expiry considerations for F&O.</li>
+        <li><strong>Preliminary watchlist:</strong> Based on today's movers and sector rotation, ask Claude to suggest 3-5 stocks to watch tomorrow.</li>
+        <li><strong>Macro calendar:</strong> Ask Claude to flag any major events tomorrow — US data releases, earnings, RBI announcements, F&O expiry.</li>
+        <li><strong>Set intention:</strong> Write one sentence: "Tomorrow I will focus on [X]" — based on today's improvement point.</li>
+      </ul>
+    </div>
+
+    <!-- EOD Checklist -->
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">✅</span> End-of-Day Checklist</div>
+      <div class="checklist-wrap" data-group="eod">
+        <div class="checklist-counter" id="eod-counter">0 / 8 complete</div>
+        <div class="checklist-progress"><div class="checklist-bar" id="eod-bar"></div></div>
+        <div class="cl-item"><input type="checkbox" id="e1" onchange="updateChecklist('eod')"><label for="e1">All trades logged with full details + screenshots</label></div>
+        <div class="cl-item"><input type="checkbox" id="e2" onchange="updateChecklist('eod')"><label for="e2">Each trade tagged: System / Impulse / Missed</label></div>
+        <div class="cl-item"><input type="checkbox" id="e3" onchange="updateChecklist('eod')"><label for="e3">Claude trade review completed</label></div>
+        <div class="cl-item"><input type="checkbox" id="e4" onchange="updateChecklist('eod')"><label for="e4">Discipline score recorded</label></div>
+        <div class="cl-item"><input type="checkbox" id="e5" onchange="updateChecklist('eod')"><label for="e5">"One thing to fix" identified for tomorrow</label></div>
+        <div class="cl-item"><input type="checkbox" id="e6" onchange="updateChecklist('eod')"><label for="e6">Overnight position plan set (if applicable)</label></div>
+        <div class="cl-item"><input type="checkbox" id="e7" onchange="updateChecklist('eod')"><label for="e7">Preliminary watchlist for tomorrow</label></div>
+        <div class="cl-item"><input type="checkbox" id="e8" onchange="updateChecklist('eod')"><label for="e8">Tomorrow's intention written</label></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======= TOOLS & SIZING ======= -->
+  <section id="tools">
+    <div class="phase-header">
+      <div class="phase-icon" style="background:rgba(139,92,246,0.15); color:var(--purple);">⚙</div>
+      <div>
+        <h2>Tools & Position Sizing</h2>
+        <div class="phase-time">Calculators and reference tools for daily use</div>
+      </div>
+    </div>
+
+    <!-- Position Size Calculator -->
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">🧮</span> Position Size Calculator</div>
+      <div class="calc-grid">
+        <div class="calc-field">
+          <label>Trading Capital (₹)</label>
+          <input type="number" id="calcCapital" value="500000" oninput="calcPosition()">
+        </div>
+        <div class="calc-field">
+          <label>Risk per Trade (%)</label>
+          <input type="number" id="calcRisk" value="1" step="0.25" oninput="calcPosition()">
+        </div>
+        <div class="calc-field">
+          <label>Entry Price (₹)</label>
+          <input type="number" id="calcEntry" value="250" oninput="calcPosition()">
+        </div>
+        <div class="calc-field">
+          <label>Stop Loss Price (₹)</label>
+          <input type="number" id="calcSL" value="245" oninput="calcPosition()">
+        </div>
+      </div>
+      <div class="calc-result" id="calcResult">
+        <div class="calc-result-row"><span class="cr-label">Risk Amount (₹)</span><span class="cr-value" id="riskAmt">₹5,000</span></div>
+        <div class="calc-result-row"><span class="cr-label">Risk per Share (₹)</span><span class="cr-value" id="riskPerShare">₹5.00</span></div>
+        <div class="calc-result-row"><span class="cr-label">Max Shares/Qty</span><span class="cr-value" id="maxShares">1,000</span></div>
+        <div class="calc-result-row"><span class="cr-label">Position Value (₹)</span><span class="cr-value" id="posValue">₹2,50,000</span></div>
+        <div class="calc-result-row"><span class="cr-label">Position as % of Capital</span><span class="cr-value" id="posPct">50.0%</span></div>
+      </div>
+    </div>
+
+    <!-- R-Multiple Calculator -->
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">📐</span> R-Multiple & RR Calculator</div>
+      <div class="calc-grid">
+        <div class="calc-field">
+          <label>Entry Price (₹)</label>
+          <input type="number" id="rrEntry" value="250" oninput="calcRR()">
+        </div>
+        <div class="calc-field">
+          <label>Stop Loss Price (₹)</label>
+          <input type="number" id="rrSL" value="245" oninput="calcRR()">
+        </div>
+        <div class="calc-field">
+          <label>Target 1 Price (₹)</label>
+          <input type="number" id="rrT1" value="260" oninput="calcRR()">
+        </div>
+        <div class="calc-field">
+          <label>Target 2 Price (₹)</label>
+          <input type="number" id="rrT2" value="270" oninput="calcRR()">
+        </div>
+      </div>
+      <div class="calc-result" id="rrResult">
+        <div class="calc-result-row"><span class="cr-label">1R (Risk per unit)</span><span class="cr-value" id="oneR">₹5.00</span></div>
+        <div class="calc-result-row"><span class="cr-label">T1 Reward : Risk</span><span class="cr-value" id="t1rr">2.0 : 1</span></div>
+        <div class="calc-result-row"><span class="cr-label">T2 Reward : Risk</span><span class="cr-value" id="t2rr">4.0 : 1</span></div>
+        <div class="calc-result-row"><span class="cr-label">Min Win Rate for T1 (breakeven)</span><span class="cr-value" id="minWR">33.3%</span></div>
+      </div>
+    </div>
+
+    <!-- Tool Stack Reference -->
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">🔧</span> AI Integration Cheat Sheet</div>
+
+      <div class="accordion-item">
+        <button class="accordion-header" onclick="toggleAccordion(event)">
+          <span>Claude AI — How to Use at Each Phase</span>
+          <span class="accordion-icon">▼</span>
+        </button>
+        <div class="accordion-content">
+          <ul class="step-list">
+            <li><strong>Pre-Market:</strong> Web-enabled searches for news, macro data, FII/DII flows. Pivot/CPR calculations. Watchlist filtering.</li>
+            <li><strong>Market Open:</strong> Chart screenshot analysis for setup grading. Pattern recognition on your watchlist.</li>
+            <li><strong>Active Trading:</strong> Emotional guardrail prompts. Signal validation. Mid-session news checks. Rule-checking when tempted to deviate.</li>
+            <li><strong>Mid-Day:</strong> Bias recalibration with context update. P&L analysis and continue/stop recommendation.</li>
+            <li><strong>EOD:</strong> Trade log analysis, discipline scoring, pattern mining, weekly reviews, next-day prep.</li>
+          </ul>
+          <div class="note-box"><strong>Pro tip:</strong> Start each Claude session with a system context: "You are my trading analyst following the [your system name] methodology. My capital is ₹X. My max risk per trade is Y%." This keeps every response aligned to your framework.</div>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-header" onclick="toggleAccordion(event)">
+          <span>TradingView — Essential Setup</span>
+          <span class="accordion-icon">▼</span>
+        </button>
+        <div class="accordion-content">
+          <ul class="step-list">
+            <li><strong>Chart layout:</strong> Multi-pane with 5-min, 15-min, and 75-min for intraday. Daily for swing context.</li>
+            <li><strong>Core indicators:</strong> 12/34 EMA band, VWAP, volume histogram, RSI (14). Add your system-specific indicators (Wavy Tunnel, RMI, etc.).</li>
+            <li><strong>Screener:</strong> Save filters for EMA crossovers, volume spikes, and RSI conditions on F&O stocks.</li>
+            <li><strong>Alerts:</strong> Set price alerts at your key levels, OR breakout levels, and indicator signal conditions. Use webhook if automating further.</li>
+            <li><strong>Screenshot workflow:</strong> Use the camera icon to capture charts → send to Claude for analysis.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-header" onclick="toggleAccordion(event)">
+          <span>Notion / Google Sheets — Trade Journal Template</span>
+          <span class="accordion-icon">▼</span>
+        </button>
+        <div class="accordion-content">
+          <ul class="step-list">
+            <li><strong>Required columns:</strong> Date, Time, Ticker, Direction, Entry, SL, Target, Exit, P&L (₹), P&L (R), Setup Grade, Tag (System/Impulse/Missed), Screenshot, Notes.</li>
+            <li><strong>Daily summary row:</strong> Total trades, win rate, total R, discipline score (1-10), one-line lesson.</li>
+            <li><strong>Weekly summary sheet:</strong> Aggregate stats, equity curve, setup breakdown, improvement tracker.</li>
+            <li><strong>Monthly review:</strong> Feed the full month's data to Claude for a comprehensive performance audit.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="accordion-item">
+        <button class="accordion-header" onclick="toggleAccordion(event)">
+          <span>Automation Stack (Advanced)</span>
+          <span class="accordion-icon">▼</span>
+        </button>
+        <div class="accordion-content">
+          <ul class="step-list">
+            <li><strong>Level 1 (Start here):</strong> Manual workflow — TradingView charts + Claude prompts + Notion log. This is sufficient for most traders.</li>
+            <li><strong>Level 2:</strong> TradingView alerts → webhook → Google Sheets for automatic signal logging.</li>
+            <li><strong>Level 3:</strong> Pine Script scanner → webhook bridge → Claude Code rules engine for automated screening and grading.</li>
+            <li><strong>Level 4:</strong> Full pipeline with Notion command center, automated daily reports, and Claude Code for systematic analysis.</li>
+          </ul>
+          <div class="note-box"><strong>Start simple.</strong> Most edge comes from discipline and consistency, not automation complexity. Only level up when the manual process is fully internalized.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Reference -->
+    <div class="card">
+      <div class="card-title"><span class="ct-icon">🏷️</span> Quick Reference — Risk Rules Summary</div>
+      <div class="stat-row">
+        <div class="stat-box" style="border-color:rgba(239,68,68,0.3);">
+          <div class="stat-val" style="color:var(--red);">1%</div>
+          <div class="stat-label">Max Risk / Trade</div>
+        </div>
+        <div class="stat-box" style="border-color:rgba(245,158,11,0.3);">
+          <div class="stat-val" style="color:var(--amber);">3</div>
+          <div class="stat-label">Max Open Positions</div>
+        </div>
+        <div class="stat-box" style="border-color:rgba(239,68,68,0.3);">
+          <div class="stat-val" style="color:var(--red);">3%</div>
+          <div class="stat-label">Daily Loss Limit</div>
+        </div>
+        <div class="stat-box" style="border-color:rgba(16,185,129,0.3);">
+          <div class="stat-val" style="color:var(--green);">2:1</div>
+          <div class="stat-label">Min Reward:Risk</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="footer">
+  AI-Powered Day Trading Playbook &nbsp;•&nbsp; Use at your own risk &nbsp;•&nbsp; Past performance ≠ future results &nbsp;•&nbsp; Always manage risk first
+</div>
+
+<script>
+  function showSection(id, btn) {
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function toggleAccordion(event) {
+    const header = event.currentTarget;
+    const content = header.nextElementSibling;
+    header.classList.toggle('active');
+    content.classList.toggle('active');
+  }
+
+  function updateChecklist(group) {
+    const wrap = document.querySelector(`[data-group="${group}"]`);
+    const total = wrap.querySelectorAll('input[type="checkbox"]').length;
+    const checked = wrap.querySelectorAll('input[type="checkbox"]:checked').length;
+    const pct = (checked / total) * 100;
+    document.getElementById(`${group}-bar`).style.width = pct + '%';
+    document.getElementById(`${group}-counter`).textContent = `${checked} / ${total} complete`;
+  }
+
+  function copyPrompt(btn) {
+    const text = btn.parentElement.querySelector('.prompt-text').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 1500);
+    });
+  }
+
+  function fmt(n) {
+    return n.toLocaleString('en-IN', { maximumFractionDigits: 2 });
+  }
+
+  function calcPosition() {
+    const cap = parseFloat(document.getElementById('calcCapital').value) || 0;
+    const riskPct = parseFloat(document.getElementById('calcRisk').value) || 0;
+    const entry = parseFloat(document.getElementById('calcEntry').value) || 0;
+    const sl = parseFloat(document.getElementById('calcSL').value) || 0;
+
+    const riskAmt = cap * (riskPct / 100);
+    const riskPerShare = Math.abs(entry - sl);
+    const maxShares = riskPerShare > 0 ? Math.floor(riskAmt / riskPerShare) : 0;
+    const posValue = maxShares * entry;
+    const posPct = cap > 0 ? ((posValue / cap) * 100) : 0;
+
+    document.getElementById('riskAmt').textContent = '₹' + fmt(riskAmt);
+    document.getElementById('riskPerShare').textContent = '₹' + fmt(riskPerShare);
+    document.getElementById('maxShares').textContent = fmt(maxShares);
+    document.getElementById('posValue').textContent = '₹' + fmt(posValue);
+    document.getElementById('posPct').textContent = posPct.toFixed(1) + '%';
+  }
+
+  function calcRR() {
+    const entry = parseFloat(document.getElementById('rrEntry').value) || 0;
+    const sl = parseFloat(document.getElementById('rrSL').value) || 0;
+    const t1 = parseFloat(document.getElementById('rrT1').value) || 0;
+    const t2 = parseFloat(document.getElementById('rrT2').value) || 0;
+
+    const oneR = Math.abs(entry - sl);
+    const t1rr = oneR > 0 ? Math.abs(t1 - entry) / oneR : 0;
+    const t2rr = oneR > 0 ? Math.abs(t2 - entry) / oneR : 0;
+    const minWR = t1rr > 0 ? (1 / (1 + t1rr)) * 100 : 0;
+
+    document.getElementById('oneR').textContent = '₹' + fmt(oneR);
+    document.getElementById('t1rr').textContent = t1rr.toFixed(1) + ' : 1';
+    document.getElementById('t2rr').textContent = t2rr.toFixed(1) + ' : 1';
+    document.getElementById('minWR').textContent = minWR.toFixed(1) + '%';
+  }
+
+  // Init calculators
+  calcPosition();
+  calcRR();
+</script>
+</body>
+</html>
